@@ -8,6 +8,7 @@
 
 | Contexto | Pacote | Agregados / VOs | Responsabilidade |
 |---|---|---|---|
+| Identidade | `identity` | `User`, `Email`, `PasswordHash`, `RefreshToken` | cadastro, login, emissão de JWT RS256, refresh, recuperação de senha |
 | Compartilhado | `shared` | `Money`, `Quantity`, `UnitPrice`, `Percentage`, `CompetenceMonth`, `UserId`, `DomainException`, `NotFoundException` | tipos e infraestrutura comuns |
 | Perfil | `profile` | `Profile` | usuário do app, meta de proventos |
 | Lançamentos | `ledger` | `Transaction` (raiz), `Category`, `PaymentMethod`, `InstallmentInfo` | despesas, receitas, movimentos de investimento, estatísticas do mês |
@@ -112,7 +113,7 @@ Exceções de domínio estendem `DomainException(code, message pt-BR)`; um `Exce
 | **Frontend unit** | Vitest | `domain/` TS puro: `format`, schemas zod, cálculos de prévia | ms |
 | **Frontend componente** | Vitest + Testing Library | componentes do DS e formulários | ms |
 | **Frontend integração** | Vitest + Testing Library + **MSW** | página inteira com API mockada pelo contrato de docs/03 | s |
-| **E2E** | Playwright | fluxo crítico contra API local + Supabase local | min |
+| **E2E** | Playwright | fluxo crítico contra API local + Postgres (docker compose) | min |
 
 ### Ciclo TDD obrigatório (por caso de uso)
 1. **Red (domínio):** escrever os testes unitários da regra → rodar → **mostrar a falha**.
@@ -137,18 +138,18 @@ maven-surefire (*Test) · maven-failsafe (*IT) · jacoco (check: domain ≥ 90% 
 ```
 ```properties
 # src/test/resources/application.properties (ou %test.)
-%test.mp.jwt.verify.publickey.location=publicKey.pem
-%test.mp.jwt.verify.publickey.algorithm=RS256
-%test.mp.jwt.verify.issuer=https://test.supabase.co/auth/v1
-%test.smallrye.jwt.sign.key.location=privateKey.pem
+# mesmo formato inline das env vars JWT_PUBLIC_KEY/JWT_PRIVATE_KEY; o par de teste fica em
+# src/test/resources/META-INF/microprofile-config.properties (só no classpath de teste)
+%test.mp.jwt.verify.publickey=${test.jwt.public-key}
+%test.smallrye.jwt.sign.key=${test.jwt.private-key}
 %test.app.jobs.secret=test-secret
 %test.quarkus.rest-client.brapi.url=http://localhost:${quarkus.http.test-port}/fake-brapi
 ```
 ```java
 // TestTokens.java — cada teste usa um usuário aleatório ⇒ isolamento sem limpar o banco
 public static String forUser(UUID id) {
-  return Jwt.issuer("https://test.supabase.co/auth/v1").subject(id.toString())
-            .audience("authenticated").claim("email", id + "@test.dev").sign();
+  // issuer/audience/validade vêm de smallrye.jwt.new-token.* — iguais aos tokens emitidos pela API
+  return Jwt.subject(id.toString()).claim("email", id + "@test.dev").sign();
 }
 ```
 - `FakeBrapiResource` (só no perfil test) devolve cotações fixas.
@@ -163,7 +164,7 @@ test: { environment: 'jsdom', setupFiles: ['src/test/setup.ts'],
 ```
 - `src/test/msw/handlers.ts` — handlers por endpoint com fixtures baseadas em `design/reference/finance/data.js` (mesmos números das capturas ⇒ fácil comparar visualmente).
 - `renderWithProviders()` (QueryClient novo por teste, Router em memória, Auth fake).
-- Playwright: `e2e/fluxo-principal.spec.ts` com `docker compose` (Postgres) + API local; usuário criado via Admin API no `globalSetup`.
+- Playwright: `e2e/fluxo-principal.spec.ts` com `docker compose` (Postgres) + API local; usuário criado via `POST /auth/register` no `globalSetup`.
 
 ## 7. Frontend em "DDD leve"
 ```

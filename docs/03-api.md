@@ -1,6 +1,6 @@
 # 03 · Contrato da API (REST, `/api/v1`)
 
-Todas as rotas exigem `Authorization: Bearer <supabase access_token>`, exceto `/q/health/*` e `/internal/jobs/*` (header `X-Job-Secret`). OpenAPI gerado em `/q/openapi`; o frontend pode gerar tipos com `openapi-typescript`.
+Todas as rotas exigem `Authorization: Bearer <accessToken>` (JWT RS256 emitido pela própria API), exceto `/auth/*`, `/q/health/*` e `/internal/jobs/*` (header `X-Job-Secret`). OpenAPI gerado em `/q/openapi`; o frontend pode gerar tipos com `openapi-typescript`.
 
 ## Convenções
 - JSON camelCase. Dinheiro como **número JSON** com até 2 casas (`1234.56`); quantidade/preço até 8. Datas `yyyy-MM-dd`; meses `yyyy-MM`.
@@ -13,12 +13,23 @@ Todas as rotas exigem `Authorization: Bearer <supabase access_token>`, exceto `/
 ```
 Status: 400 malformado · 401 sem token · 404 inexistente **ou de outro usuário** · 409 conflito (ex.: fatura já paga) · 422 validação de negócio.
 
+## Autenticação (contexto `identity`) — proposta, detalhar e confirmar no Passo 3
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/auth/register` | `{ displayName, email, password }` → 201 `{ accessToken, expiresIn }` + refresh token |
+| POST | `/auth/login` | `{ email, password }` → 200 `{ accessToken, expiresIn }` + refresh token · 401 "E-mail ou senha inválidos" |
+| POST | `/auth/refresh` | troca o refresh token (rotacionado a cada uso) por novo `accessToken` |
+| POST | `/auth/logout` | revoga o refresh token atual |
+| POST | `/auth/forgot-password` | `{ email }` → 202 sempre (não revela se o e-mail existe); envia link de redefinição |
+| POST | `/auth/reset-password` | `{ token, password }` → 204 |
+Access token: JWT RS256, `iss=investidor100-api`, `aud=investidor100`, `sub`=userId, claim `email`, validade 15 min. Pendências do Passo 3: onde o web guarda o refresh token (cookie httpOnly cross-site vs. armazenamento local) e o provedor de e-mail para recuperação de senha.
+
 ## Perfil
 | Método | Rota | Descrição |
 |---|---|---|
 | GET | `/me` | upsert preguiçoso + retorna `{ userId, displayName, email, monthlyDividendGoal }` |
 | PATCH | `/me` | `{ displayName?, monthlyDividendGoal? }` |
-| DELETE | `/me` | apaga todos os dados do usuário + conta no Supabase (Admin API) |
+| DELETE | `/me` | apaga todos os dados do usuário, inclusive a conta (`app.users`) e os refresh tokens |
 
 ## Categorias e orçamento
 | GET | `/categories?kind=expense\|income` | sistema + do usuário, ordenadas por `sortOrder` |

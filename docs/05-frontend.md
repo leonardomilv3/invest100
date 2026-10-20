@@ -1,7 +1,7 @@
 # 05 · Frontend (React 18 + Vite + TypeScript)
 
 ## Dependências
-`react-router-dom` 6 · `@tanstack/react-query` 5 · `@supabase/supabase-js` 2 · `react-hook-form` + `zod` + `@hookform/resolvers` · `lucide-react` · `date-fns` · `clsx`. Dev: `vitest` + `@testing-library/react` + `msw` (mocks da API) · `@playwright/test` (e2e) · `eslint` + `prettier` · `openapi-typescript` (opcional).
+`react-router-dom` 6 · `@tanstack/react-query` 5 · `react-hook-form` + `zod` + `@hookform/resolvers` · `lucide-react` · `date-fns` · `clsx`. Dev: `vitest` + `@testing-library/react` + `msw` (mocks da API) · `@playwright/test` (e2e) · `eslint` + `prettier` · `openapi-typescript` (opcional).
 **Não** usar biblioteca de UI (MUI/Chakra/shadcn) nem de gráficos — os gráficos do design são SVG próprios e já existem em `design/components/charts/`.
 
 ## Estrutura
@@ -25,7 +25,7 @@ apps/web/src/
 │   │   └── Button.tsx + Button.module.css (+ Button.test.tsx)
 │   └── index.ts             barrel
 ├── lib/
-│   ├── supabase.ts          createClient(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+│   ├── auth.ts              login/cadastro/refresh/logout contra /api/v1/auth/* (sem SDK de terceiros)
 │   ├── api/client.ts        fetch wrapper: injeta Bearer, parse problem+json → ApiError
 │   ├── api/types.ts         DTOs (espelho de docs/03-api.md ou gerado do OpenAPI)
 │   ├── format.ts            brl, signed, pct, fmt, compact, parseBRL, monthLabel
@@ -69,7 +69,7 @@ Diálogo: `?novo=despesa|receita|investimento[&ativo=PETR4]` abre o "Adicionar l
 - **Invalidação após salvar lançamento** (o protótipo atualiza todas as telas): despesa/receita → `summary`, `transactions`, `budgets`, `cards`, `invoice`, `installments`; investimento → + `portfolio`, `dividends`. Use `queryClient.invalidateQueries` com prefixos.
 - `staleTime` 30s; `refetchOnWindowFocus` true. Cotações: `refetchInterval` 5 min no `portfolio` em horário de pregão.
 - **UI local:** aba via rota; estado de filtros via `useSearchParams`; grupos de ativos abertos/fechados em `localStorage` (`i100.groups.<classe>`).
-- **Auth:** `supabase.auth.onAuthStateChange` → contexto; `client.ts` lê `session.access_token` a cada request (supabase-js renova sozinho). 401 da API → `signOut()` + redirect `/entrar`.
+- **Auth:** `AuthProvider` guarda o `accessToken` em memória; `client.ts` injeta o Bearer em cada request e, ao receber 401, tenta um `POST /auth/refresh` uma vez antes de `signOut()` + redirect `/entrar`. Onde fica o refresh token (cookie httpOnly vs. armazenamento local) é decidido no Passo 3.
 
 ## Formulário "Adicionar lançamento"
 - `react-hook-form` + `zod` com schema discriminado por `type`.

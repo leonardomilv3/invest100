@@ -3,7 +3,8 @@
 Gerenciador pessoal de investimentos + finanças (pt-BR, BRL, B3). Monorepo:
 - `apps/web` — React 18 + Vite + TypeScript → Vercel
 - `apps/api` — Java 25 + Quarkus 3.40 LTS (REST) → Render (Docker)
-- Banco/Auth — Supabase (Postgres + Supabase Auth) **somente em produção**; em dev, Postgres via `docker compose`
+- Banco — Postgres: Supabase **somente em produção**; em dev, `docker compose`
+- Auth — própria da API: JWT RS256, chaves em env vars (`JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY`) em dev (`apps/api/.env`) e prod (Render)
 - `docs/` — specs (arquitetura, banco, API, regras, frontend, telas, deploy, plano)
 - `design/` — referência visual hi-fi (NÃO é código de produção)
 
@@ -11,6 +12,7 @@ Gerenciador pessoal de investimentos + finanças (pt-BR, BRL, B3). Monorepo:
 ```bash
 # raiz
 docker compose up -d                # Postgres 17 local (Docker); db em localhost:54322
+cd apps/api && ./scripts/gen-jwt-keys.sh  # 1ª vez: par RSA de dev em apps/api/.env
 # web
 cd apps/web && npm i && npm run dev # http://localhost:5173
 npm run lint && npm run typecheck && npm test && npm run build
@@ -28,7 +30,7 @@ cd apps/api && ./mvnw quarkus:dev   # http://localhost:8080 · Swagger em /q/swa
 - Migrations são imutáveis depois de aplicadas: crie `V{n+1}__*.sql`, nunca edite uma antiga.
 
 ## Arquitetura e testes (detalhes em docs/09)
-- **DDD leve:** contextos `shared · profile · ledger · budget · cards · portfolio · marketdata · summary`, cada um com `domain/ application/ infrastructure/ api/`. Regras de negócio no domínio (agregados/VOs ricos); casos de uso finos; portas no domínio; contextos conversam por casos de uso públicos ou eventos CDI. `ArchitectureTest` (ArchUnit) sempre verde.
+- **DDD leve:** contextos `shared · identity · profile · ledger · budget · cards · portfolio · marketdata · summary`, cada um com `domain/ application/ infrastructure/ api/`. Regras de negócio no domínio (agregados/VOs ricos); casos de uso finos; portas no domínio; contextos conversam por casos de uso públicos ou eventos CDI. `ArchitectureTest` (ArchUnit) sempre verde.
 - **TDD estrito:** teste vermelho (mostrar saída) → mínimo para verde → refatorar. Ordem: domínio → aplicação (fakes em memória) → API (`*IT`, Dev Services, JWT de teste, usuário aleatório por teste) → frontend (Vitest/RTL/MSW). Sem código de produção sem teste que o exija.
 - Cobertura mínima: domínio ≥ 90% (cards/portfolio ≥ 95%), total ≥ 80%.
 - Testes Java em pt-BR snake_case: `compra_no_dia_do_fechamento_vai_para_a_proxima()`.
@@ -40,6 +42,7 @@ cd apps/api && ./mvnw quarkus:dev   # http://localhost:8080 · Swagger em /q/swa
 - Erros em `application/problem+json` (RFC 9457) com mensagens pt-BR iguais às do design ("Informe uma descrição").
 - Resources só mapeiam DTO ↔ comando; DTOs como `record`. Sem lógica em resources nem em casos de uso além de orquestração.
 - Tabelas no schema `app` (não exposto pela Data API do Supabase). O frontend nunca acessa tabelas diretamente.
+- Nunca versionar chave privada JWT, senha ou `.env`. Senhas só com hash forte; nunca logar senha/token.
 
 ## Regras invioláveis — frontend
 - Visual **somente** via tokens CSS (`src/styles/tokens/*.css`). Nada de hex solto fora dos tokens, exceto `CATEGORY_META`.

@@ -3,12 +3,12 @@
 ## Visão
 ```
  Navegador (React SPA, Vercel)
-   │  1. login/cadastro ───────────────► Supabase Auth  (email+senha; Google opcional)
-   │  ◄── access_token (JWT, ES256) ───┘
+   │  1. POST /api/v1/auth/login|register ──► Quarkus API (email+senha)
+   │  ◄── accessToken (JWT RS256, assinado com JWT_PRIVATE_KEY) + refresh token
    │  2. fetch /api/v1/*  Authorization: Bearer <JWT>
    ▼
  Quarkus API (Render, Docker)
-   │  valida JWT via JWKS do Supabase (cacheado) → user_id = claim `sub`
+   │  valida JWT com JWT_PUBLIC_KEY (iss, aud, exp) → user_id = claim `sub`
    │  JDBC (Agroal) ── Supavisor session pooler :5432 (IPv4) ──► Postgres Supabase, schema `app`
    │  REST client ─────────────────────────────────────────────► brapi.dev (cotações B3)
    ▲
@@ -16,10 +16,10 @@
 ```
 
 ## Princípios
-1. **Supabase = Postgres + Auth.** O frontend usa `@supabase/supabase-js` **apenas para autenticação**. Todos os dados passam pela API Quarkus. Isso centraliza regras de negócio (parcelas, preço médio) e mantém um só lugar para validar.
+1. **A API é o provedor de identidade.** Cadastro, login, refresh e recuperação de senha são endpoints da própria API (contexto `identity`), que emite JWT **RS256** com um par de chaves vindo de env vars — `JWT_PRIVATE_KEY` assina, `JWT_PUBLIC_KEY` valida — em dev (`apps/api/.env`, gerado por `scripts/gen-jwt-keys.sh`) e em produção (Environment do Render, par próprio). Supabase é **só Postgres** em produção. Todos os dados passam pela API Quarkus. Isso centraliza regras de negócio (parcelas, preço médio) e mantém um só lugar para validar.
 2. **Schema `app` privado.** Tabelas não ficam em `public`, então a Data API (PostgREST) do Supabase não as expõe mesmo com a anon/publishable key pública. RLS habilitado em todas como defesa em profundidade (sem policies = nega tudo para `anon`/`authenticated`).
 3. **Backend é dono do schema.** Migrations via **Flyway** no Quarkus (`migrate-at-start`). Não usar migrations do Supabase CLI para o schema `app` (evita duas fontes de verdade). Supabase é usado **apenas em produção**; em desenvolvimento o banco é o Postgres do `docker-compose.yml` (decisão do Passo 0).
-4. **Sem FK para `auth.users`.** Permite testar com Postgres puro (Dev Services). O perfil é criado de forma preguiçosa (upsert) na primeira chamada autenticada (`GET /me`). Exclusão de conta: endpoint `DELETE /me` apaga dados do `app` e chama a Admin API do Supabase.
+4. **Usuários no schema `app`.** `app.users` (e-mail, hash de senha) e `app.refresh_tokens` são da API — nada depende do schema `auth` do Supabase, então tudo roda em Postgres puro (Dev Services, docker compose). O perfil é criado de forma preguiçosa (upsert) na primeira chamada autenticada (`GET /me`). Exclusão de conta: `DELETE /me` apaga os dados do usuário em `app`, incluindo `users`.
 5. **Cálculos derivados no servidor.** Posições, totais de fatura, orçamento consumido e KPIs vêm prontos da API; o frontend só formata.
 6. **Latência API↔DB > latência usuário↔API.** Cada request faz várias queries; coloque **Render e Supabase na mesma região** (recomendado: Supabase `us-east-1` + Render `virginia`). Render não tem região no Brasil.
 
@@ -66,7 +66,8 @@ Extensões Quarkus: `rest`, `rest-jackson`, `hibernate-orm-panache`, `jdbc-postg
 | prod | Vercel Production | Render `investidor100-api` | projeto Supabase prod |
 
 ## Segurança (checklist)
-- JWT: validar assinatura (JWKS), `iss = https://<ref>.supabase.co/auth/v1`, `aud = authenticated`, `exp`.
+- JWT: RS256, validar assinatura (`JWT_PUBLIC_KEY`), `iss = JWT_ISSUER` (`investidor100-api`), `aud = investidor100`, `exp` (access token de 15 min). Um par de chaves por ambiente; a privada só existe no `.env` local e no Render.
+- Senhas com hash forte (BCrypt/Argon2id); nunca logar senha nem token.
 - CORS: só origens do Vercel (prod + regex de previews) e localhost.
 - Rate limit leve por usuário em POSTs (ex.: 60/min) — filtro simples em memória.
 - Segredos só em variáveis de ambiente; `.env*` no `.gitignore`.
@@ -77,4 +78,5 @@ Extensões Quarkus: `rest`, `rest-jackson`, `hibernate-orm-panache`, `jdbc-postg
 |---|---|
 | 2026-10-20 (Passo 0) | **Java 25** em todo o projeto (build, Dockerfile `maven:3.9-eclipse-temurin-25` / `eclipse-temurin:25-jre`, CI). |
 | 2026-10-20 (Passo 0) | **Quarkus 3.40 LTS** (platform `3.40.1.1`) — LTS mais recente na data. |
-| 2026-10-20 (Passo 0) | **Supabase só em produção.** Dev usa Postgres 17 do `docker-compose.yml` (porta 54322, mesmos defaults do `application.properties`); testes usam Dev Services. Pendente (Passo 3/4): como autenticar em dev/E2E sem Supabase local. |
+| 2026-10-20 (Passo 0) | **Supabase só em produção.** Dev usa Postgres 17 do `docker-compose.yml` (porta 54322, mesmos defaults do `application.properties`); testes usam Dev Services. |
+| 2026-10-20 (Passo 0) | **Auth própria com JWT RS256**, em dev e prod: a API emite e valida tokens com par de chaves em env vars (`JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY`, PEM base64 de uma linha). Substitui o Supabase Auth e o `@supabase/supabase-js`. Testes usam o mesmo formato (par de teste em `src/test/resources/META-INF/microprofile-config.properties`). Endpoints `/auth/*` e armazenamento do refresh token: Passo 3/4 (ver docs/03). |

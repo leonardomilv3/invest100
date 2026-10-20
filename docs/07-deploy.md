@@ -2,8 +2,7 @@
 
 ## 1. Supabase
 1. Criar projeto (prod) — região **us-east-1** (mesma região do Render). Opcional: projeto `staging`.
-2. **Auth → Providers:** Email (confirmação ligada). Google opcional.
-3. **Auth → URL Configuration:** Site URL = `https://investidor100.vercel.app`; Redirect URLs: `https://investidor100.vercel.app/**`, `https://*-<time>.vercel.app/**`, `http://localhost:5173/**`.
+2. **Supabase é só o banco.** Auth é da própria API (JWT RS256, ver Render). Não habilitar providers do Supabase Auth.
 4. **Auth → JWT Signing Keys:** usar chaves assimétricas (ES256, padrão em projetos novos). A API valida via JWKS: `https://<ref>.supabase.co/auth/v1/.well-known/jwks.json`. Se o projeto ainda usar o segredo legado HS256, migre para signing keys no painel.
 5. **Email templates** em pt-BR (confirmação, recuperar senha) com o tom do produto.
 6. **Database → Connect → Session pooler** (Supavisor, porta 5432, IPv4) → copiar host/usuário (`postgres.<ref>`). Render não tem saída IPv6, então **não** usar a conexão direta `db.<ref>.supabase.co`. Não usar o transaction pooler (6543) — quebra prepared statements do Hibernate.
@@ -24,14 +23,15 @@ select cron.schedule('snapshots', '0 2 * * *', $$
 - **Blueprint** `render.yaml` na raiz (arquivo em `infra/render.yaml`). Serviço Docker, `rootDir: apps/api`, health check `/q/health/ready`, build filter `apps/api/**`.
 - **Plano:** Free dorme após ~15 min sem tráfego (cold start de dezenas de segundos para JVM) e tem 512 MB. Para produção usar **Starter** ou superior. No free, manter `-XX:MaxRAMPercentage=75` e pool pequeno.
 - Porta: Quarkus lê `PORT` (`quarkus.http.port=${PORT:8080}`).
-- Variáveis (ver `infra/env.api.example`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `CORS_ORIGINS`, `BRAPI_TOKEN`, `JOBS_SECRET`.
+- Variáveis (ver `apps/api/.env.example`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_PUBLIC_KEY`, `JWT_PRIVATE_KEY`, `JWT_ISSUER`, `CORS_ORIGINS`, `BRAPI_TOKEN`, `JOBS_SECRET`.
+- **Chaves JWT:** gerar um par exclusivo de produção com `apps/api/scripts/gen-jwt-keys.sh --print` e colar `JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY` no Environment do Render (secret, `sync: false`). Nunca reutilizar o par de dev. Rotação: trocar o par invalida todos os tokens em circulação (usuários fazem login de novo).
 - Flyway roda no start (`migrate-at-start=true`). Para várias instâncias, Flyway usa lock — ok.
 - Native image (GraalVM/Mandrel) é opcional: reduz memória e cold start, mas o build costuma estourar a memória do builder do Render. Se quiser, buildar no GitHub Actions, publicar no GHCR e usar "Deploy from image" no Render.
 
 ## 3. Vercel (Web)
 - Importar o repo, **Root Directory** `apps/web`, Framework **Vite**, build `npm run build`, output `dist`.
 - `apps/web/vercel.json` (arquivo em `infra/vercel.json`) com rewrite SPA e headers de cache/segurança.
-- Variáveis: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` (Production → API prod; Preview → API staging).
+- Variáveis: `VITE_API_URL` (Production → API prod; Preview → API staging).
 - **Ignored Build Step:** `git diff --quiet HEAD^ HEAD -- .` (relativo ao root dir) para não rebuildar quando só a API muda.
 
 ## 4. CORS
@@ -46,9 +46,9 @@ select cron.schedule('snapshots', '0 2 * * *', $$
 ## 6. Checklist de go-live
 - [ ] Região Render = região Supabase
 - [ ] Session pooler + `sslmode=require`
-- [ ] JWT validando `iss`/`aud`; teste com token expirado → 401
+- [ ] JWT RS256 validando `iss`/`aud`; teste com token expirado → 401; par de chaves de produção ≠ dev
 - [ ] CORS só com origens conhecidas
 - [ ] Tabelas no schema `app` + RLS ligado (conferir que `/rest/v1/` não expõe nada)
 - [ ] Backups (plano Pro do Supabase tem PITR)
-- [ ] Domínio próprio no Vercel + atualizar Site URL do Supabase e `CORS_ORIGINS`
+- [ ] Domínio próprio no Vercel + atualizar `CORS_ORIGINS`
 - [ ] pg_cron agendado e respondendo 200

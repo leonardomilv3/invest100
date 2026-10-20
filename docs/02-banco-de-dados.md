@@ -27,6 +27,8 @@ quotes (symbol PK, global)          portfolio_snapshots (user_id, month)
 ## Tabelas
 | Tabela | Campos principais | Notas |
 |---|---|---|
+| `users` *(migration nova no Passo 3)* | `id` PK, `email` (único, case-insensitive), `password_hash`, `created_at` | identidade própria da API (auth JWT RS256); `profiles.user_id` passa a referenciar `users.id` |
+| `refresh_tokens` *(Passo 3)* | `user_id`, `token_hash`, `expires_at`, `revoked_at`, `replaced_by` | rotação a cada `/auth/refresh`; só o hash é guardado |
 | `profiles` | `user_id` PK, `display_name`, `email`, `monthly_dividend_goal` | upsert em `GET /me` a partir das claims |
 | `categories` | `user_id` (null = sistema), `slug`, `label`, `kind` (`expense`/`income`/`system`), `icon` (nome Lucide), `color_token`, `bg_hex`, `fg_hex`, `sort_order`, `archived` | `unique nulls not distinct (user_id, slug)`. Seed = `CATEGORY_META` |
 | `budgets` | `category_id`, `monthly_limit` | um limite fixo mensal por categoria |

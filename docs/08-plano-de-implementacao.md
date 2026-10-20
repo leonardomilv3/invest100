@@ -34,14 +34,14 @@ Capturas de referência em `screenshots/`.
 
 ## Passo 3 — Shells, rotas e autenticação
 **Prompt:**
-> Execute o Passo 3. Implemente lib/supabase, AuthProvider, AuthGate, telas Entrar/Cadastro/Recuperar/Redefinir senha (docs/06 › Auth), DesktopShell e MobileShell (docs/06 › Shell), router de docs/05 com placeholders Empty, LancamentoProvider (`?novo=`), Toast, useBreakpoint. TDD com Testing Library.
+> Execute o Passo 3. Implemente o contexto `identity` na API (cadastro, login, refresh, logout, recuperar/redefinir senha — docs/03 › Autenticação; migration nova com `app.users` e `app.refresh_tokens`) e, no web, lib/auth, AuthProvider, AuthGate, telas Entrar/Cadastro/Recuperar/Redefinir senha (docs/06 › Auth), DesktopShell e MobileShell (docs/06 › Shell), router de docs/05 com placeholders Empty, LancamentoProvider (`?novo=`), Toast, useBreakpoint. TDD com Testing Library.
 
-**Testes primeiro:** `AuthGate.test` (sem sessão → /entrar; com sessão → filho) · `Entrar.test` (validação, erro do Supabase em pt-BR) · `DesktopShell.test` (aba ativa pela rota) · `MobileShell.test` (BottomNav; "Mais" abre sheet; FAB abre `?novo=despesa`) · `useBreakpoint.test` (899/900/1199/1200).
-**Pronto quando:** login real no Supabase local; navegação igual às capturas desktop e mobile.
+**Testes primeiro:** `AuthGate.test` (sem sessão → /entrar; com sessão → filho) · `Entrar.test` (validação, erro da API em pt-BR) · `UserTest`/`PasswordTest` (domínio) · `AuthResourceIT` (cadastro, login inválido 401, refresh rotaciona, logout revoga) · `DesktopShell.test` (aba ativa pela rota) · `MobileShell.test` (BottomNav; "Mais" abre sheet; FAB abre `?novo=despesa`) · `useBreakpoint.test` (899/900/1199/1200).
+**Pronto quando:** login real contra a API local (docker compose); navegação igual às capturas desktop e mobile.
 
 ## Passo 4 — Perfil + categorias + integração web↔API
 **Prompt:**
-> Execute o Passo 4. Contexto `profile` e `ledger.Category`. Migrations V1/V2 de backend/db/migration. JWT via JWKS (prod) e chave de teste (test). Casos de uso: GetOrCreateProfile, UpdateProfile, ListCategories, CreateCategory, ArchiveCategory. Web: lib/api/client.ts (Bearer, ApiError, 401 → signOut) e /me no UserChip/Avatar. Deploy de teste em Render + Vercel.
+> Execute o Passo 4. Contexto `profile` e `ledger.Category`. Migrations V1/V2 de backend/db/migration. JWT RS256 com chaves em env vars (dev/prod) e par de teste (test). Casos de uso: GetOrCreateProfile, UpdateProfile, ListCategories, CreateCategory, ArchiveCategory. Web: lib/api/client.ts (Bearer, ApiError, 401 → signOut) e /me no UserChip/Avatar. Deploy de teste em Render + Vercel.
 
 **Testes primeiro:**
 - Unit: `ProfileTest` (nome obrigatório; meta ≥ 0) · `CategoryTest` (sistema não pode ser editada/arquivada; kind válido).
@@ -118,7 +118,7 @@ Capturas de referência em `screenshots/`.
 
 ## Passo 12 — Configurações, estados e acessibilidade
 **Prompt:**
-> Execute o Passo 12. Implemente Configurações (docs/06), DELETE /me (apaga dados + Admin API do Supabase), skeletons, estados de erro/vazio (docs/05), rate limit de POSTs, revisão de acessibilidade.
+> Execute o Passo 12. Implemente Configurações (docs/06), DELETE /me (apaga dados + conta em `app.users`), skeletons, estados de erro/vazio (docs/05), rate limit de POSTs, revisão de acessibilidade.
 
 **Testes primeiro:** `DeleteAccountIT` (apaga tudo do usuário, não toca outros) · `RateLimitIT` (61ª requisição/min → 429) · MSW `Configuracoes.test` (`excluir_exige_digitar_EXCLUIR`) · testes de estados (`mostra_skeleton`, `erro_com_tentar_novamente`) · `axe` nos testes de página (jest-axe/vitest-axe sem violações).
 
