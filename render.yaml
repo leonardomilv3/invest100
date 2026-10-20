@@ -1,0 +1,33 @@
+# render.yaml (raiz do repositório) — Blueprint
+services:
+  - type: web
+    name: investidor100-api
+    runtime: docker
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile
+    region: virginia          # mesma região do Supabase (us-east-1)
+    plan: starter             # free dorme após inatividade
+    healthCheckPath: /q/health/ready
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/api/**
+    envVars:
+      - key: DB_URL
+        sync: false           # jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+      - key: DB_USER
+        sync: false           # postgres.<project-ref>
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_POOL_MAX
+        value: "5"
+      - key: SUPABASE_URL
+        sync: false           # https://<project-ref>.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: BRAPI_TOKEN
+        sync: false
+      - key: JOBS_SECRET
+        generateValue: true
