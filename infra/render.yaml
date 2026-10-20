@@ -21,10 +21,12 @@ services:
         sync: false
       - key: DB_POOL_MAX
         value: "5"
-      - key: SUPABASE_URL
-        sync: false           # https://<project-ref>.supabase.co
-      - key: SUPABASE_SERVICE_KEY
+      - key: JWT_PUBLIC_KEY
+        sync: false           # apps/api/scripts/gen-jwt-keys.sh --print (par exclusivo de produção)
+      - key: JWT_PRIVATE_KEY
         sync: false
+      - key: JWT_ISSUER
+        value: investidor100-api
       - key: CORS_ORIGINS
         sync: false
       - key: BRAPI_TOKEN
