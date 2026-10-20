@@ -205,7 +205,8 @@ do $$ declare t text; begin
   foreach t in array array['profiles','budgets','credit_cards','transactions'] loop
     execute format('create trigger %I_touch before update on app.%I for each row execute function app.touch_updated_at()', t, t);
   end loop;
-  for t in select tablename from pg_tables where schemaname = 'app' loop
+  -- exclui a tabela de controle do Flyway: alterá-la durante a migração trava no lock que o próprio Flyway segura
+  for t in select tablename from pg_tables where schemaname = 'app' and tablename <> 'flyway_schema_history' loop
     execute format('alter table app.%I enable row level security', t);
   end loop;
 end $$;
