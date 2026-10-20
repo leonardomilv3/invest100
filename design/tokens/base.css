@@ -1,0 +1,10 @@
+/* Investidor100 — element defaults. Kept minimal; components carry their own styling via tokens. */
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;font-family:var(--font-sans);font-size:var(--text-body);line-height:var(--leading-normal);color:var(--text-primary);background:var(--bg-app);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"tnum" 0;}
+*,*::before,*::after{box-sizing:border-box;}
+a{color:var(--text-primary);text-decoration:underline;text-decoration-color:var(--lime-500);text-underline-offset:3px;}
+a:hover{color:var(--ink-600);text-decoration-color:var(--ink-900);}
+button{font-family:inherit;}
+.i100-num{font-variant-numeric:tabular-nums;letter-spacing:var(--tracking-snug);}
+:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+::selection{background:var(--lime-300);color:var(--ink-900);}

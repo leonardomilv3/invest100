@@ -1,0 +1,98 @@
+/* Investidor100 — color tokens. Base palette pulled from the reference ("Color and Typography" board: #FFFFFF / #141414 / #C2F86C) plus market semantics sampled from the dashboard screens. */
+:root{
+  /* Lime — the single brand accent */
+  --lime-50:#F7FEEC;
+  --lime-100:#EDFCD3;
+  --lime-200:#DDFBAE;
+  --lime-300:#C2F86C;
+  --lime-400:#AEEB4E;
+  --lime-500:#93D52E;
+  --lime-700:#4D7A10;
+  --lime-glow:rgba(194,248,108,0.35);
+
+  /* Ink — warm-neutral greys anchored on #141414 */
+  --ink-950:#0A0A0A;
+  --ink-900:#141414;
+  --ink-800:#222222;
+  --ink-700:#333333;
+  --ink-600:#4D4D4D;
+  --ink-500:#6B6B6B;
+  --ink-400:#8E8E8E;
+  --ink-300:#B4B4B4;
+  --ink-200:#D6D6D6;
+  --ink-150:#E4E4E3;
+  --ink-100:#EEEEED;
+  --ink-75:#F2F2F1;
+  --ink-50:#F7F7F6;
+  --white:#FFFFFF;
+
+  /* Market semantics */
+  --green-600:#16924A;
+  --green-500:#1FA855;
+  --green-400:#2BC48A;
+  --green-50:#E8F7EE;
+  --red-600:#D9431E;
+  --red-500:#F0532D;
+  --red-50:#FDEDE8;
+  --amber-500:#E9AE2A;
+  --amber-400:#F5C04A;
+  --amber-50:#FDF5E3;
+  --blue-500:#3D6BF5;
+
+  /* Semantic — surfaces */
+  --bg-app:var(--ink-100);
+  --bg-app-glow:radial-gradient(60% 50% at 0% 100%, rgba(194,248,108,0.28) 0%, rgba(194,248,108,0) 70%), radial-gradient(50% 40% at 100% 0%, rgba(194,248,108,0.14) 0%, rgba(194,248,108,0) 70%);
+  --surface-card:var(--ink-50);
+  --surface-raised:var(--white);
+  --surface-sunken:var(--ink-75);
+  --surface-inverse:var(--ink-900);
+  --surface-accent:var(--lime-300);
+  --surface-accent-soft:var(--lime-100);
+  --surface-overlay:rgba(20,20,20,0.32);
+
+  /* Semantic — text */
+  --text-primary:var(--ink-900);
+  --text-secondary:var(--ink-500);
+  --text-tertiary:var(--ink-400);
+  --text-disabled:var(--ink-300);
+  --text-on-inverse:var(--white);
+  --text-on-accent:var(--ink-900);
+  --text-positive:var(--green-500);
+  --text-negative:var(--red-500);
+  --text-warning:var(--amber-500);
+
+  /* Semantic — borders */
+  --border-subtle:rgba(20,20,20,0.06);
+  --border-default:rgba(20,20,20,0.10);
+  --border-strong:rgba(20,20,20,0.18);
+  --border-highlight:rgba(255,255,255,0.85);
+  --focus-ring:0 0 0 3px rgba(194,248,108,0.9), 0 0 0 4px var(--ink-900);
+
+  /* Semantic — data viz */
+  --chart-positive:var(--green-400);
+  --chart-low:var(--amber-400);
+  --chart-negative:var(--red-500);
+  --chart-highlight:var(--lime-300);
+  --chart-grid:rgba(20,20,20,0.08);
+  --chart-fill:rgba(43,196,138,0.10);
+
+  /* Middle-ground surfaces (v2 · finance): white outlined cards on a lighter canvas */
+  --bg-app-soft:#F3F3F1;
+  --surface-outlined:var(--white);
+  --border-card:#E6E6E3;
+  --border-field:#DCDCD8;
+  --blue-50:#E7EDFE;
+  --text-info:var(--blue-500);
+
+  /* Categorical palette — spending categories, donut/stack series */
+  --cat-lime:#C2F86C;
+  --cat-ink:#141414;
+  --cat-teal:#2BC48A;
+  --cat-blue:#3D6BF5;
+  --cat-amber:#F5C04A;
+  --cat-coral:#F0532D;
+  --cat-violet:#8B7CF6;
+  --cat-sky:#38BDF8;
+  --cat-pink:#EC6FA8;
+  --cat-stone:#B4B4B4;
+}
