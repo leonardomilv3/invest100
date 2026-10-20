@@ -8,7 +8,7 @@
 
 | Contexto | Pacote | Agregados / VOs | Responsabilidade |
 |---|---|---|---|
-| Identidade | `identity` | `User`, `Email`, `PasswordHash`, `RefreshToken` | cadastro, login, emissão de JWT RS256, refresh, recuperação de senha |
+| Identidade | `identity` | `User`, `Email`, `PasswordHash`, `RefreshToken` | cadastro, login (BCrypt), emissão de JWT RS256, refresh com rotação, logout |
 | Compartilhado | `shared` | `Money`, `Quantity`, `UnitPrice`, `Percentage`, `CompetenceMonth`, `UserId`, `DomainException`, `NotFoundException` | tipos e infraestrutura comuns |
 | Perfil | `profile` | `Profile` | usuário do app, meta de proventos |
 | Lançamentos | `ledger` | `Transaction` (raiz), `Category`, `PaymentMethod`, `InstallmentInfo` | despesas, receitas, movimentos de investimento, estatísticas do mês |

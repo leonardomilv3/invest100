@@ -16,13 +16,12 @@ Status: 400 malformado · 401 sem token · 404 inexistente **ou de outro usuári
 ## Autenticação (contexto `identity`) — proposta, detalhar e confirmar no Passo 3
 | Método | Rota | Descrição |
 |---|---|---|
-| POST | `/auth/register` | `{ displayName, email, password }` → 201 `{ accessToken, expiresIn }` + refresh token |
-| POST | `/auth/login` | `{ email, password }` → 200 `{ accessToken, expiresIn }` + refresh token · 401 "E-mail ou senha inválidos" |
-| POST | `/auth/refresh` | troca o refresh token (rotacionado a cada uso) por novo `accessToken` |
-| POST | `/auth/logout` | revoga o refresh token atual |
-| POST | `/auth/forgot-password` | `{ email }` → 202 sempre (não revela se o e-mail existe); envia link de redefinição |
-| POST | `/auth/reset-password` | `{ token, password }` → 204 |
-Access token: JWT RS256, `iss=investidor100-api`, `aud=investidor100`, `sub`=userId, claim `email`, validade 15 min. Pendências do Passo 3: onde o web guarda o refresh token (cookie httpOnly cross-site vs. armazenamento local) e o provedor de e-mail para recuperação de senha.
+| POST | `/auth/register` | `{ displayName, email, password }` → 201 `AuthTokens` · 409 "Este e-mail já está cadastrado" |
+| POST | `/auth/login` | `{ email, password }` → 200 `AuthTokens` · 401 "E-mail ou senha inválidos" |
+| POST | `/auth/refresh` | `{ refreshToken }` → 200 `AuthTokens` (o refresh token antigo é revogado — rotação) · 401 se inválido/expirado/revogado |
+| POST | `/auth/logout` | `{ refreshToken }` → 204 (revoga) |
+`AuthTokens` = `{ accessToken, expiresIn, refreshToken }`. Access token: JWT RS256, `iss=investidor100-api`, `aud=investidor100`, `sub`=userId, claim `email`, validade 15 min. Refresh token: opaco, 30 dias, devolvido no corpo JSON (o web guarda em `localStorage`). Senha: mínimo 8 caracteres, hash BCrypt.
+Recuperar/redefinir senha e confirmação de e-mail ficam **fora do MVP** (sem serviço de e-mail).
 
 ## Perfil
 | Método | Rota | Descrição |

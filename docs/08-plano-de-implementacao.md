@@ -9,7 +9,7 @@ Capturas de referência em `screenshots/`.
 
 ## Passo 0 — Monorepo, ferramentas e esqueleto de testes
 **Prompt:**
-> Execute o Passo 0 de docs/08. Leia CLAUDE.md, docs/01, docs/07 e docs/09. Crie o monorepo (apps/web Vite react-ts; apps/api Quarkus 3 LTS, Java 25 , Maven, pacote br.com.investidor100). Configure: surefire (*Test) + failsafe (*IT) + JaCoCo com os limites de docs/09; AssertJ, ArchUnit, RestAssured, smallrye-jwt-build; Vitest + Testing Library + MSW + cobertura; Playwright; ESLint/Prettier; GitHub Actions; render.yaml, vercel.json, Dockerfile, application.properties a partir de backend/ e infra/. Remova o sufixo .txt de design/. Não implemente features.
+> Execute o Passo 0 de docs/08. Leia CLAUDE.md, docs/01, docs/07 e docs/09. Crie o monorepo (web Vite react-ts; api Quarkus 3 LTS, Java 25 , Maven, pacote br.com.investidor100). Configure: surefire (*Test) + failsafe (*IT) + JaCoCo com os limites de docs/09; AssertJ, ArchUnit, RestAssured, smallrye-jwt-build; Vitest + Testing Library + MSW + cobertura; Playwright; ESLint/Prettier; GitHub Actions; render.yaml, vercel.json, Dockerfile, application.properties a partir de backend/ e infra/. Remova o sufixo .txt de design/. Não implemente features.
 
 **Testes primeiro:** `ArchitectureTest` (regras de docs/09 §2 — passam vazias) · `HealthIT` (`GET /q/health/ready` = 200) · `App.test.tsx` (renderiza sem erro).
 **Pronto quando:** `./mvnw verify` e `npm run test && npm run build` verdes; CI verde.
@@ -34,14 +34,14 @@ Capturas de referência em `screenshots/`.
 
 ## Passo 3 — Shells, rotas e autenticação
 **Prompt:**
-> Execute o Passo 3. Implemente o contexto `identity` na API (cadastro, login, refresh, logout, recuperar/redefinir senha — docs/03 › Autenticação; migration nova com `app.users` e `app.refresh_tokens`) e, no web, lib/auth, AuthProvider, AuthGate, telas Entrar/Cadastro/Recuperar/Redefinir senha (docs/06 › Auth), DesktopShell e MobileShell (docs/06 › Shell), router de docs/05 com placeholders Empty, LancamentoProvider (`?novo=`), Toast, useBreakpoint. TDD com Testing Library.
+> Execute o Passo 3. Implemente o contexto `identity` na API (cadastro, login, refresh, logout com BCrypt — docs/03 › Autenticação; migration nova com `app.users` e `app.refresh_tokens`) e, no web, lib/auth, AuthProvider, AuthGate, telas Entrar/Cadastro (docs/06 › Auth; sem recuperar senha no MVP), DesktopShell e MobileShell (docs/06 › Shell), router de docs/05 com placeholders Empty, LancamentoProvider (`?novo=`), Toast, useBreakpoint. TDD com Testing Library.
 
 **Testes primeiro:** `AuthGate.test` (sem sessão → /entrar; com sessão → filho) · `Entrar.test` (validação, erro da API em pt-BR) · `UserTest`/`PasswordTest` (domínio) · `AuthResourceIT` (cadastro, login inválido 401, refresh rotaciona, logout revoga) · `DesktopShell.test` (aba ativa pela rota) · `MobileShell.test` (BottomNav; "Mais" abre sheet; FAB abre `?novo=despesa`) · `useBreakpoint.test` (899/900/1199/1200).
 **Pronto quando:** login real contra a API local (docker compose); navegação igual às capturas desktop e mobile.
 
 ## Passo 4 — Perfil + categorias + integração web↔API
 **Prompt:**
-> Execute o Passo 4. Contexto `profile` e `ledger.Category`. Migrations V1/V2 de backend/db/migration. JWT RS256 com chaves em env vars (dev/prod) e par de teste (test). Casos de uso: GetOrCreateProfile, UpdateProfile, ListCategories, CreateCategory, ArchiveCategory. Web: lib/api/client.ts (Bearer, ApiError, 401 → signOut) e /me no UserChip/Avatar. Deploy de teste em Render + Vercel.
+> Execute o Passo 4. Contexto `profile` e `ledger.Category`. Migrations V1/V2 já estão em api/src/main/resources/db/migration (movidas no Passo 0). JWT RS256 com chaves em env vars (dev/prod) e par de teste (test). Casos de uso: GetOrCreateProfile, UpdateProfile, ListCategories, CreateCategory, ArchiveCategory. Web: lib/api/client.ts (Bearer, ApiError, 401 → signOut) e /me no UserChip/Avatar. Deploy de teste em Render + Vercel.
 
 **Testes primeiro:**
 - Unit: `ProfileTest` (nome obrigatório; meta ≥ 0) · `CategoryTest` (sistema não pode ser editada/arquivada; kind válido).

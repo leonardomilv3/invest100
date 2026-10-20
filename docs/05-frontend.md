@@ -6,7 +6,7 @@
 
 ## Estrutura
 ```
-apps/web/src/
+web/src/
 ├── main.tsx
 ├── app/
 │   ├── providers.tsx        QueryClient, AuthProvider, Router
@@ -31,7 +31,7 @@ apps/web/src/
 │   ├── format.ts            brl, signed, pct, fmt, compact, parseBRL, monthLabel
 │   └── useBreakpoint.ts     mobile <900 · wide ≥1200
 └── features/
-    ├── auth/        Entrar, Cadastro, RecuperarSenha
+    ├── auth/        Entrar, Cadastro
     ├── resumo/      ResumoPage + api.ts
     ├── investimentos/
     ├── gastos/
@@ -54,7 +54,7 @@ apps/web/src/
 ## Rotas
 | Rota | Tela |
 |---|---|
-| `/entrar`, `/cadastro`, `/recuperar-senha`, `/redefinir-senha` | auth (públicas) |
+| `/entrar`, `/cadastro` | auth (públicas). Recuperar senha fica fora do MVP (sem serviço de e-mail) |
 | `/` | redirect → `/resumo` |
 | `/resumo` | Resumo |
 | `/investimentos` | Investimentos |
@@ -69,7 +69,7 @@ Diálogo: `?novo=despesa|receita|investimento[&ativo=PETR4]` abre o "Adicionar l
 - **Invalidação após salvar lançamento** (o protótipo atualiza todas as telas): despesa/receita → `summary`, `transactions`, `budgets`, `cards`, `invoice`, `installments`; investimento → + `portfolio`, `dividends`. Use `queryClient.invalidateQueries` com prefixos.
 - `staleTime` 30s; `refetchOnWindowFocus` true. Cotações: `refetchInterval` 5 min no `portfolio` em horário de pregão.
 - **UI local:** aba via rota; estado de filtros via `useSearchParams`; grupos de ativos abertos/fechados em `localStorage` (`i100.groups.<classe>`).
-- **Auth:** `AuthProvider` guarda o `accessToken` em memória; `client.ts` injeta o Bearer em cada request e, ao receber 401, tenta um `POST /auth/refresh` uma vez antes de `signOut()` + redirect `/entrar`. Onde fica o refresh token (cookie httpOnly vs. armazenamento local) é decidido no Passo 3.
+- **Auth:** `AuthProvider` guarda o `accessToken` em memória e o `refreshToken` em `localStorage` (`i100.refreshToken`). Ao abrir o app, se houver refresh token, chama `POST /auth/refresh` para obter a sessão. `client.ts` injeta o Bearer em cada request e, ao receber 401, tenta um refresh uma única vez (requisições concorrentes compartilham a mesma promessa) antes de `signOut()` (limpa o storage + `POST /auth/logout`) e redirect `/entrar`.
 
 ## Formulário "Adicionar lançamento"
 - `react-hook-form` + `zod` com schema discriminado por `type`.

@@ -1,10 +1,10 @@
 # CLAUDE.md — Investidor100
 
 Gerenciador pessoal de investimentos + finanças (pt-BR, BRL, B3). Monorepo:
-- `apps/web` — React 18 + Vite + TypeScript → Vercel
-- `apps/api` — Java 25 + Quarkus 3.40 LTS (REST) → Render (Docker)
+- `web` — React 18 + Vite + TypeScript → Vercel
+- `api` — Java 25 + Quarkus 3.40 LTS (REST) → Render (Docker)
 - Banco — Postgres: Supabase **somente em produção**; em dev, `docker compose`
-- Auth — própria da API: JWT RS256, chaves em env vars (`JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY`) em dev (`apps/api/.env`) e prod (Render)
+- Auth — própria da API: JWT RS256, chaves em env vars (`JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY`) em dev (`api/.env`) e prod (Render)
 - `docs/` — specs (arquitetura, banco, API, regras, frontend, telas, deploy, plano)
 - `design/` — referência visual hi-fi (NÃO é código de produção)
 
@@ -12,12 +12,12 @@ Gerenciador pessoal de investimentos + finanças (pt-BR, BRL, B3). Monorepo:
 ```bash
 # raiz
 docker compose up -d                # Postgres 17 local (Docker); db em localhost:54322
-cd apps/api && ./scripts/gen-jwt-keys.sh  # 1ª vez: par RSA de dev em apps/api/.env
+cd api && ./scripts/gen-jwt-keys.sh  # 1ª vez: par RSA de dev em api/.env
 # web
-cd apps/web && npm i && npm run dev # http://localhost:5173
+cd web && npm i && npm run dev # http://localhost:5173
 npm run lint && npm run typecheck && npm test && npm run build
 # api
-cd apps/api && ./mvnw quarkus:dev   # http://localhost:8080 · Swagger em /q/swagger-ui
+cd api && ./mvnw quarkus:dev   # http://localhost:8080 · Swagger em /q/swagger-ui
 ./mvnw verify                       # testes (Dev Services sobe Postgres via Testcontainers)
 ```
 
@@ -26,7 +26,7 @@ cd apps/api && ./mvnw quarkus:dev   # http://localhost:8080 · Swagger em /q/swa
 - Compare cada tela com `screenshots/` antes de finalizar.
 - Antes de codar uma tela, leia `docs/06-telas.md` + o arquivo correspondente em `design/reference/finance/`.
 - Antes de codar regra de dinheiro, leia `docs/04-regras-de-negocio.md` e escreva o teste unitário primeiro.
-- Mudou contrato? Atualize `docs/03-api.md` e os tipos em `apps/web/src/lib/api/types.ts` no mesmo commit.
+- Mudou contrato? Atualize `docs/03-api.md` e os tipos em `web/src/lib/api/types.ts` no mesmo commit.
 - Migrations são imutáveis depois de aplicadas: crie `V{n+1}__*.sql`, nunca edite uma antiga.
 
 ## Arquitetura e testes (detalhes em docs/09)

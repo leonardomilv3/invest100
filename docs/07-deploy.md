@@ -3,8 +3,6 @@
 ## 1. Supabase
 1. Criar projeto (prod) — região **us-east-1** (mesma região do Render). Opcional: projeto `staging`.
 2. **Supabase é só o banco.** Auth é da própria API (JWT RS256, ver Render). Não habilitar providers do Supabase Auth.
-4. **Auth → JWT Signing Keys:** usar chaves assimétricas (ES256, padrão em projetos novos). A API valida via JWKS: `https://<ref>.supabase.co/auth/v1/.well-known/jwks.json`. Se o projeto ainda usar o segredo legado HS256, migre para signing keys no painel.
-5. **Email templates** em pt-BR (confirmação, recuperar senha) com o tom do produto.
 6. **Database → Connect → Session pooler** (Supavisor, porta 5432, IPv4) → copiar host/usuário (`postgres.<ref>`). Render não tem saída IPv6, então **não** usar a conexão direta `db.<ref>.supabase.co`. Não usar o transaction pooler (6543) — quebra prepared statements do Hibernate.
 7. **API keys:** anon/publishable → frontend. service_role/secret → só na API (para `DELETE /me` via Admin API). Nunca no frontend.
 8. **Agendamentos** (SQL Editor, após o deploy da API):
@@ -20,17 +18,17 @@ select cron.schedule('snapshots', '0 2 * * *', $$
 (horários em UTC: 13–21 UTC ≈ 10–18h BRT). Guardar o segredo no Vault do Supabase em vez de literal, se preferir. Isso também "acorda" a API no plano free.
 
 ## 2. Render (API)
-- **Blueprint** `render.yaml` na raiz (arquivo em `infra/render.yaml`). Serviço Docker, `rootDir: apps/api`, health check `/q/health/ready`, build filter `apps/api/**`.
+- **Blueprint** `render.yaml` na raiz (arquivo em `infra/render.yaml`). Serviço Docker, `rootDir: api`, health check `/q/health/ready`, build filter `api/**`.
 - **Plano:** Free dorme após ~15 min sem tráfego (cold start de dezenas de segundos para JVM) e tem 512 MB. Para produção usar **Starter** ou superior. No free, manter `-XX:MaxRAMPercentage=75` e pool pequeno.
 - Porta: Quarkus lê `PORT` (`quarkus.http.port=${PORT:8080}`).
-- Variáveis (ver `apps/api/.env.example`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_PUBLIC_KEY`, `JWT_PRIVATE_KEY`, `JWT_ISSUER`, `CORS_ORIGINS`, `BRAPI_TOKEN`, `JOBS_SECRET`.
-- **Chaves JWT:** gerar um par exclusivo de produção com `apps/api/scripts/gen-jwt-keys.sh --print` e colar `JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY` no Environment do Render (secret, `sync: false`). Nunca reutilizar o par de dev. Rotação: trocar o par invalida todos os tokens em circulação (usuários fazem login de novo).
+- Variáveis (ver `api/.env.example`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_PUBLIC_KEY`, `JWT_PRIVATE_KEY`, `JWT_ISSUER`, `CORS_ORIGINS`, `BRAPI_TOKEN`, `JOBS_SECRET`.
+- **Chaves JWT:** gerar um par exclusivo de produção com `api/scripts/gen-jwt-keys.sh --print` e colar `JWT_PUBLIC_KEY`/`JWT_PRIVATE_KEY` no Environment do Render (secret, `sync: false`). Nunca reutilizar o par de dev. Rotação: trocar o par invalida todos os tokens em circulação (usuários fazem login de novo).
 - Flyway roda no start (`migrate-at-start=true`). Para várias instâncias, Flyway usa lock — ok.
 - Native image (GraalVM/Mandrel) é opcional: reduz memória e cold start, mas o build costuma estourar a memória do builder do Render. Se quiser, buildar no GitHub Actions, publicar no GHCR e usar "Deploy from image" no Render.
 
 ## 3. Vercel (Web)
-- Importar o repo, **Root Directory** `apps/web`, Framework **Vite**, build `npm run build`, output `dist`.
-- `apps/web/vercel.json` (arquivo em `infra/vercel.json`) com rewrite SPA e headers de cache/segurança.
+- Importar o repo, **Root Directory** `web`, Framework **Vite**, build `npm run build`, output `dist`.
+- `web/vercel.json` (arquivo em `infra/vercel.json`) com rewrite SPA e headers de cache/segurança.
 - Variáveis: `VITE_API_URL` (Production → API prod; Preview → API staging).
 - **Ignored Build Step:** `git diff --quiet HEAD^ HEAD -- .` (relativo ao root dir) para não rebuildar quando só a API muda.
 
@@ -39,8 +37,8 @@ select cron.schedule('snapshots', '0 2 * * *', $$
 `https://investidor100.vercel.app,/https://investidor100-.*-<time>\.vercel\.app/,http://localhost:5173` (Quarkus aceita regex entre barras).
 
 ## 5. CI (GitHub Actions)
-- `web.yml` (paths `apps/web/**`): `npm ci` → lint → typecheck → vitest → build.
-- `api.yml` (paths `apps/api/**`): Temurin **25** → `./mvnw -B verify` (Dev Services usa Docker do runner).
+- `web.yml` (paths `web/**`): `npm ci` → lint → typecheck → vitest → build.
+- `api.yml` (paths `api/**`): Temurin **25** → `./mvnw -B verify` (Dev Services usa Docker do runner).
 - Deploys: Vercel e Render via integração Git (auto-deploy em `main`; preview em PR no Vercel).
 
 ## 6. Checklist de go-live

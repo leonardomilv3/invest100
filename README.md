@@ -28,7 +28,7 @@ Os arquivos em `design/` são **referências de design criadas em HTML/JSX** —
 4. `docs/09-ddd-e-testes.md` → contextos, camadas, regras ArchUnit, pirâmide de testes, infra de teste (JWT de teste, Dev Services, MSW).
 5. Specs de referência (consultadas sob demanda pelo Claude Code):
    - `docs/01-arquitetura.md` — monorepo, fluxo de auth, decisões
-   - `docs/02-banco-de-dados.md` — modelo de dados (+ `backend/db/migration/*.sql`)
+   - `docs/02-banco-de-dados.md` — modelo de dados (+ `api/src/main/resources/db/migration/*.sql`)
    - `docs/03-api.md` — contrato REST
    - `docs/04-regras-de-negocio.md` — fatura, parcelas, preço médio, orçamento, KPIs
    - `docs/05-frontend.md` — estrutura, port do design system, estado, rotas
@@ -43,13 +43,11 @@ design_handoff_investidor100/
 ├── CLAUDE.md                 ← regras permanentes do Claude Code
 ├── docs/01…09-*.md
 ├── screenshots/              ← capturas hi-fi: desktop 1440 (01–06) e mobile 390 (01–05)
-├── backend/
-│   ├── db/migration/V1__schema.sql, V2__seed.sql   ← Flyway (src/main/resources/db/migration)
-│   ├── application.properties
-│   └── Dockerfile
+├── api/                      ← backend Java 25 + Quarkus (Flyway em src/main/resources/db/migration)
+├── web/                      ← frontend React + Vite
 ├── infra/
 │   ├── render.yaml           ← Blueprint Render (raiz do repo)
-│   ├── vercel.json           ← apps/web/vercel.json
+│   ├── vercel.json           ← web/vercel.json
 │   ├── env.web.example
 │   └── env.api.example
 └── design/

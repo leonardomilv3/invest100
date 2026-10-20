@@ -1,6 +1,6 @@
 # 02 · Banco de dados (Supabase Postgres, schema `app`)
 
-SQL completo e executável em `backend/db/migration/V1__schema.sql` e `V2__seed.sql` → copiar para `apps/api/src/main/resources/db/migration/`.
+SQL completo e executável em `api/src/main/resources/db/migration/` (`V1__schema.sql`, `V2__seed.sql`; Flyway aplica ao subir a API). Migrations aplicadas são imutáveis: mudanças vão em `V{n+1}__*.sql`.
 
 ## Convenções
 - PK `uuid default gen_random_uuid()`. Toda tabela de usuário tem `user_id uuid not null` + índice começando por `user_id`.

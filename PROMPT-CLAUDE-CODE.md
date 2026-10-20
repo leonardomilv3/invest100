@@ -7,15 +7,15 @@
 Você é o engenheiro responsável por implementar o **Investidor100**, um gerenciador pessoal de investimentos + finanças (pt-BR, BRL), do zero até produção.
 
 ## Stack e hospedagem (fixas)
-- Frontend: React 18 + Vite + TypeScript → **Vercel** (`apps/web`)
-- Backend: Java 25  + Quarkus 3 LTS (REST/JSON) → **Render** via Docker (`apps/api`)
+- Frontend: React 18 + Vite + TypeScript → **Vercel** (`web`)
+- Backend: Java 25  + Quarkus 3 LTS (REST/JSON) → **Render** via Docker (`api`)
 - Banco + Auth: **Supabase** (Postgres, schema privado `app`; Supabase Auth com JWT validado na API)
 
 ## Fontes da verdade (leia antes de qualquer código)
 1. `CLAUDE.md` — regras invioláveis e comandos.
 2. `docs/09-ddd-e-testes.md` — arquitetura **DDD leve** (contextos, camadas, regras ArchUnit) e estratégia **TDD** (pirâmide, ciclo, infra de teste).
 3. `docs/08-plano-de-implementacao.md` — passos 0–13 com testes a escrever primeiro e critérios de pronto.
-4. Specs: `docs/01` arquitetura · `docs/02` banco (+ `backend/db/migration/*.sql`) · `docs/03` contrato da API · `docs/04` regras de negócio · `docs/05` frontend · `docs/06` telas · `docs/07` deploy.
+4. Specs: `docs/01` arquitetura · `docs/02` banco (+ `api/src/main/resources/db/migration/*.sql`) · `docs/03` contrato da API · `docs/04` regras de negócio · `docs/05` frontend · `docs/06` telas · `docs/07` deploy.
 5. Visual: `screenshots/*.png` (referência hi-fi desktop 1440 e mobile 390) e `design/` (tokens, componentes e telas de referência — **não** é código de produção; recrie em TSX).
 Se houver conflito: regra de negócio → `docs/04`; contrato → `docs/03`; visual → `screenshots/` + `design/reference/finance`.
 
