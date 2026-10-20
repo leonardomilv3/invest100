@@ -36,6 +36,13 @@ Regras verificadas por **ArchUnit** (`ArchitectureTest`):
 - Contexto A só acessa contexto B via `B.application` (casos de uso/portas públicas) ou eventos — nunca `B.domain` repositórios ou `B.infrastructure`. Exceção: `shared`.
 - Classes em `..application..` terminam com nome de verbo (`RegisterExpense`) ou `Query`.
 
+Implementação (Passo 0) — `src/test/java/.../architecture/ArchitectureRules.java`, com auto-teste `ArchitectureRulesTest` sobre fixtures:
+- O contexto é o segmento antes da camada (`<contexto>.<domain|application|infrastructure|api>`).
+- "Eventos" = pacote `<contexto>.domain.event` — é a única parte do `domain` de outro contexto que pode ser referenciada.
+- Domínio também não pode depender de CDI (`jakarta.enterprise..`, `jakarta.inject..`).
+- Nome de caso de uso: classe de topo em `application` que começa com um verbo da lista `USE_CASE_VERBS` (Add, Archive, Calculate, Change, Close, Compute, Create, Delete, Get, Import, List, On, Pay, Preview, Record, Refresh, Register, Remove, Resolve, Set, Take, Update, Upsert) ou termina em `Query`/`Command`/`Result`. Novo verbo → adicione à lista.
+- Regras vazias passam (`archRule.failOnEmptyShould=false`) enquanto não há código.
+
 ## 3. Modelo rico — exemplos de comportamento no domínio
 ```java
 // cards.domain
@@ -156,7 +163,7 @@ test: { environment: 'jsdom', setupFiles: ['src/test/setup.ts'],
 ```
 - `src/test/msw/handlers.ts` — handlers por endpoint com fixtures baseadas em `design/reference/finance/data.js` (mesmos números das capturas ⇒ fácil comparar visualmente).
 - `renderWithProviders()` (QueryClient novo por teste, Router em memória, Auth fake).
-- Playwright: `e2e/fluxo-principal.spec.ts` com `supabase start` + API local; usuário criado via Admin API no `globalSetup`.
+- Playwright: `e2e/fluxo-principal.spec.ts` com `docker compose` (Postgres) + API local; usuário criado via Admin API no `globalSetup`.
 
 ## 7. Frontend em "DDD leve"
 ```

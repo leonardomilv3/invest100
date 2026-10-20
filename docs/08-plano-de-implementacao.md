@@ -126,7 +126,7 @@ Capturas de referência em `screenshots/`.
 **Prompt:**
 > Execute o Passo 13. Escreva os E2E Playwright e execute o checklist de go-live de docs/07.
 
-**Testes:** `e2e/auth.spec.ts` (cadastro → login → logout) · `e2e/fluxo-principal.spec.ts` (despesa 10x no cartão → Gastos 1/10 → Cartões fatura/parcelamento → pagar fatura → limite liberado) · `e2e/investimento.spec.ts` (compra → PM → venda parcial → resultado) · `e2e/mobile.spec.ts` (viewport 390: FAB, bottom sheet, BottomNav). Rodar em CI contra stack local (supabase start + api + web).
+**Testes:** `e2e/auth.spec.ts` (cadastro → login → logout) · `e2e/fluxo-principal.spec.ts` (despesa 10x no cartão → Gastos 1/10 → Cartões fatura/parcelamento → pagar fatura → limite liberado) · `e2e/investimento.spec.ts` (compra → PM → venda parcial → resultado) · `e2e/mobile.spec.ts` (viewport 390: FAB, bottom sheet, BottomNav). Rodar em CI contra stack local (docker compose + api + web; ver pendência de Auth em dev em docs/01).
 **Pronto quando:** E2E verde em CI; Lighthouse a11y ≥ 95; checklist de docs/07 completo.
 
 ---

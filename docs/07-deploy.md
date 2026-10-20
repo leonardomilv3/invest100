@@ -40,7 +40,7 @@ select cron.schedule('snapshots', '0 2 * * *', $$
 
 ## 5. CI (GitHub Actions)
 - `web.yml` (paths `apps/web/**`): `npm ci` → lint → typecheck → vitest → build.
-- `api.yml` (paths `apps/api/**`): Temurin 21 → `./mvnw -B verify` (Dev Services usa Docker do runner).
+- `api.yml` (paths `apps/api/**`): Temurin **25** → `./mvnw -B verify` (Dev Services usa Docker do runner).
 - Deploys: Vercel e Render via integração Git (auto-deploy em `main`; preview em PR no Vercel).
 
 ## 6. Checklist de go-live

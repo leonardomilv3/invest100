@@ -47,4 +47,4 @@ quotes (symbol PK, global)          portfolio_snapshots (user_id, month)
 Recalculadas a partir de `trades` (ordenadas por `trade_date, created_at`) a cada leitura — permite editar/apagar operações retroativas sem inconsistência. Volume por usuário é pequeno (centenas de operações). Se ficar lento, cache por usuário invalidado em qualquer escrita em `trades`.
 
 ## Ambiente local
-`supabase start` → Postgres em `postgresql://postgres:postgres@localhost:54322/postgres`. O Quarkus aplica Flyway ao subir. Testes usam Dev Services (Postgres em container) — por isso nenhuma dependência do schema `auth`.
+`docker compose up -d` (raiz do repo) → Postgres 17 em `postgresql://postgres:postgres@localhost:54322/postgres`. O Quarkus aplica Flyway ao subir. Testes usam Dev Services (Postgres em container) — por isso nenhuma dependência do schema `auth`.

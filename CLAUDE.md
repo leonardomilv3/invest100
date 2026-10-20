@@ -2,15 +2,15 @@
 
 Gerenciador pessoal de investimentos + finanças (pt-BR, BRL, B3). Monorepo:
 - `apps/web` — React 18 + Vite + TypeScript → Vercel
-- `apps/api` — Java 25 + Quarkus 3 LTS (REST) → Render (Docker)
-- Banco/Auth — Supabase (Postgres + Supabase Auth)
+- `apps/api` — Java 25 + Quarkus 3.40 LTS (REST) → Render (Docker)
+- Banco/Auth — Supabase (Postgres + Supabase Auth) **somente em produção**; em dev, Postgres via `docker compose`
 - `docs/` — specs (arquitetura, banco, API, regras, frontend, telas, deploy, plano)
 - `design/` — referência visual hi-fi (NÃO é código de produção)
 
 ## Comandos
 ```bash
 # raiz
-supabase start                      # Postgres + Auth locais (Docker); db em localhost:54322
+docker compose up -d                # Postgres 17 local (Docker); db em localhost:54322
 # web
 cd apps/web && npm i && npm run dev # http://localhost:5173
 npm run lint && npm run typecheck && npm test && npm run build
